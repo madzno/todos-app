@@ -1,5 +1,6 @@
 require "sinatra"
 require "sinatra/reloader"
+require "sinatra/content_for"
 require "tilt/erubis"
 
 configure do
@@ -14,12 +15,6 @@ end
 get "/" do
   redirect "/lists"
 end
-
-# GET  /lists      -> view all lists
-# GET  /lists/new  -> new list form
-# POST /lists      -> create new list
-# GET  /lists/1    -> view a single list
-
 
 # View list of lists
 get "/lists" do
@@ -46,7 +41,8 @@ end
 post "/lists" do
   list_name = params[:list_name].strip
 
-  if error = error_for_list_name(list_name)
+  error = error_for_list_name(list_name)
+  if error
     session[:error] = error
     erb :new_list, layout: :layout
   else
@@ -54,4 +50,11 @@ post "/lists" do
     session[:success] = "The list has been created"
     redirect "/lists"
   end
+end
+
+# View a single list
+get "/lists/:id" do
+  id = params[:id].to_i
+  @list = session[:lists][id]
+  erb :list, layout: :layout
 end
