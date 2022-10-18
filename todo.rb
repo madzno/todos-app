@@ -58,3 +58,27 @@ get "/lists/:id" do
   @list = session[:lists][id]
   erb :list, layout: :layout
 end
+
+# Edit an exsiting todo list
+get "/lists/:id/edit" do
+  id = params[:id].to_i
+  @list = session[:lists][id]
+  erb :edit_list, layout: :layout
+end
+
+# Update an existing to do lists
+post "/lists/:id" do
+  list_name = params[:list_name].strip
+  id = params[:id].to_i
+  @list = session[:lists][id]
+
+  error = error_for_list_name(list_name)
+  if error
+    session[:error] = error
+    erb :edit_list, layout: :layout
+  else
+    @list[:name] = list_name
+    session[:success] = "The list has been updates"
+    redirect "/lists/#{id}"
+  end
+end
