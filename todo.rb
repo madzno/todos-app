@@ -85,17 +85,26 @@ post "/lists" do
   end
 end
 
+# returns the requested list if it exsits
+# if the list does not exist, returns a error message and redirects to "/lists"
+def load_list(index)
+  list = session[:lists][index] if index && session[:lists][index]
+
+  session[:error] = "The specified list was not found"
+  redirect "/lists"
+end
+
 # View a single list
 get "/lists/:id" do
   @list_id = params[:id].to_i
-  @list = session[:lists][@list_id]
+  @list = load_list(@list_id)
   erb :list, layout: :layout
 end
 
 # Edit an exsiting todo list
 get "/lists/:id/edit" do
   id = params[:id].to_i
-  @list = session[:lists][id]
+  @list = load_list(id)
   erb :edit_list, layout: :layout
 end
 
@@ -103,7 +112,7 @@ end
 post "/lists/:id" do
   list_name = params[:list_name].strip
   id = params[:id].to_i
-  @list = session[:lists][id]
+  @list = load_list(id)
 
   error = error_for_list_name(list_name)
   if error
@@ -136,7 +145,7 @@ end
 # Add todos to a current list
 post "/lists/:list_id/todos" do
   @list_id = params[:list_id].to_i
-  @list = session[:lists][@list_id]
+  @list = load_list(@list_id)
   text = params[:todo].strip
 
   error = error_for_todo(text)
@@ -153,7 +162,7 @@ end
 # delete a todo from a list
 post "/lists/:list_id/todos/:id/delete" do
   @list_id = params[:list_id].to_i
-  @list = session[:lists][@list_id]
+  @list = load_list(@list_id)
 
   todo_id = params[:id].to_i
   @list[:todos].delete_at(todo_id)
@@ -164,7 +173,7 @@ end
 # Update the status of a todo
 post "/lists/:list_id/todos/:id" do
   @list_id = params[:list_id].to_i
-  @list = session[:lists][@list_id]
+  @list = load_list(@list_id)
 
   todo_id = params[:id].to_i
   is_completed = params[:completed] == "true"
@@ -176,7 +185,7 @@ end
 # Mark all todos as complete
 post "/lists/:id/complete_all" do
   @list_id = params[:id].to_i
-  @list = session[:lists][@list_id]
+  @list = load_list(@list_id)
 
   @list[:todos].each do |todo|
     todo[:completed] = true
