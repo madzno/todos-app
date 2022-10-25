@@ -89,6 +89,7 @@ end
 # if the list does not exist, returns a error message and redirects to "/lists"
 def load_list(index)
   list = session[:lists][index] if index && session[:lists][index]
+  return list if list
 
   session[:error] = "The specified list was not found"
   redirect "/lists"
