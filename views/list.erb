@@ -1,14 +1,15 @@
 <section id="todos" class="<%= list_class(@list) %>">
+
   <header>
     <h2><%= @list[:name]%></h2>
     <ul>
       <li>
-        <form action="/lists/<%=@list_id%>/complete_all" method="post">
+        <form action="/lists/<%= @list_id %>/complete_all" method="post">
           <button class="check" type="submit">Complete All</button>
         </form>
       </li>
       <li>
-        <a class="edit" href="/lists/<%= @list_id%>/edit">Edit Lists</a>
+        <a class="edit" href="/lists/<%= @list_id %>/edit">Edit Lists</a>
       </li>
     </ul>
   </header>
@@ -38,13 +39,13 @@
   </ul>
 </section>
 
-<form action="/lists/<%= @list_id%>/todos" method="post">
+<form action="/lists/<%= @list_id %>/todos" method="post">
   <dl>
     <dt>
       <label for="todo">Enter a new todo item:</label>
     </dt>
     <dd>
-      <input name="todo" id="todo" placeholder="Something to do" type="text" value="<%= params[:todo]%>">
+      <input name="todo" placeholder="Something to do" type="text" value="<%= params[:todo]%>">
     </dd>
   </dl>
   <fieldset class="actions">
