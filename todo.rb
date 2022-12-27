@@ -41,15 +41,42 @@ helpers do
   end
 end
 
+class SessionPersistence
+
+  def initialize(session)
+    @session = session
+    @session[:lists] ||= []
+  end
+
+  def find_list(id)
+    @session[:lists].find { |1| 1[:id] == id }
+  end
+
+  def all_lists
+    @session[:lists]
+  end
+
+  def add_list(list_name)
+    id = next_element_id(session[:lists])
+    session[:lists] << { id: id, name: list_name, todos: [] }
+  end
+
+  private
+
+  def next_element_id(elements)
+    max = elements.map { |todo| todo[:id] }.max || 0
+    max + 1
+  end
+end
+
 # Returns the requested list if it exsits
 # If the list does not exist, returns a error message and redirects to "/lists"
 def load_list(id)
-  list = session[:lists].find { |list| list[:id] == id }
+  list = @storage.find_list(id)
   return list if list
 
   session[:error] = "The specified list was not found"
   redirect "/lists"
-  halt
 end
 
 # Return an error message if the name is invalid.
@@ -57,7 +84,7 @@ end
 def error_for_list_name(name)
   if !(1..100).cover? name.size
     "List name must be between 1 and 100 characters."
-  elsif session[:lists].any? { |list| list[:name] == name }
+  elsif @storage.all_lists.any? { |list| list[:name] == name }
     "List name must be unique."
   end
 end
@@ -76,7 +103,7 @@ def next_element_id(elements)
 end
 
 before do
-  session[:lists] ||= []
+  @storage = SessionPersistence.new(session)
 end
 
 get "/" do
@@ -85,7 +112,7 @@ end
 
 # View list of lists
 get "/lists" do
-  @lists = session[:lists]
+  @lists = @storage.all_lists
   erb :lists, layout: :layout
 end
 
@@ -103,8 +130,7 @@ post "/lists" do
     session[:error] = error
     erb :new_list, layout: :layout
   else
-    id = next_element_id(session[:lists])
-    session[:lists] << { id: id, name: list_name, todos: [] }
+    @storage.add_list(list_name)
     session[:success] = "The list has been created"
     redirect "/lists"
   end
