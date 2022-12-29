@@ -1,5 +1,4 @@
 require "sinatra"
-require "sinatra/reloader" if development?
 require "sinatra/content_for"
 require "tilt/erubis"
 
@@ -9,7 +8,11 @@ configure do
   enable :sessions
   set :session_secret, "ab9f53e4f022b9d54e8039267fc7704a32ba20279636acb6dfc49ab4840ae3bc"
   set :erb, :escape_html => true
-  also_reload "database_persistence.rb" if development?
+end
+
+configure(:development) do
+  require "sinatra/reloader"
+  also_reload "database_persistence.rb"
 end
 
 helpers do
